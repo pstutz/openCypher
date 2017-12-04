@@ -21,7 +21,7 @@ object Records {
   def emptyWithHeader(header: List[String]) = Records(header, List.empty)
 }
 
-case class Records(header: List[String], rows: List[Map[String, String]]) {
+case class Records(header: List[String], rows: List[Map[String, Any]]) {
 
   def equalsUnordered(otherRecords: Records): Boolean = {
     def equalHeaders = header == otherRecords.header

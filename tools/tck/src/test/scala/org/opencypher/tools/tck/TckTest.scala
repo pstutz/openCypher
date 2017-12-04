@@ -17,7 +17,6 @@
 package org.opencypher.tools.tck
 
 import org.junit.jupiter.api.{DynamicTest, TestFactory}
-import org.opencypher.tools.tck.migration.Records
 
 import scala.collection.JavaConverters._
 

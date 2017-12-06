@@ -21,9 +21,6 @@ object CypherValue {
     val value = visitor.visit(featureResultsContext)
     println(value)
     value
-    //    if (s.startsWith("(")) {
-    //      println(s"$s -> parsed=${featureResultsContext.toStringTree(parser)}")
-    //    }
   }
 
 }
@@ -52,11 +49,7 @@ case class CypherList(elements: List[CypherValue]) extends CypherValue
 
 case object CypherNull extends CypherValue
 
-case class CypherPath(
-                       nodes: Set[CypherNode],
-                       relationships: Set[CypherRelationship],
-                       connections: Set[Connection]
-                     ) extends CypherValue
+case class CypherPath(connections: List[Connection]) extends CypherValue
 
 case class Connection(s: CypherNode, r: CypherRelationship, t: CypherNode)
 
@@ -99,26 +92,19 @@ class CypherValueVisitor extends FeatureResultsBaseVisitor[CypherValue] {
 
   override def visitPathBody(ctx: PathBodyContext) = {
     val initialNode = visitNodeDesc(ctx.nodeDesc)
-    val (path, _) = ctx.pathLink.asScala.toList.foldLeft((CypherPath(Set.empty, Set.empty, Set.empty), initialNode)) {
+    val (reversedPath, _) = ctx.pathLink.asScala.toList.foldLeft((List.empty[Connection], initialNode)) {
       case ((pathSoFar, currentNode), nextLink) =>
         val forward = Try(visitRelationshipDesc(nextLink.forwardsRelationship.relationshipDesc)).toOption
         val backward = Try(visitRelationshipDesc(nextLink.backwardsRelationship.relationshipDesc)).toOption
         val otherNode = visitNodeDesc(nextLink.nodeDesc)
-        val updatedNodes = pathSoFar.nodes + otherNode
-        val updatedRelationships: Set[CypherRelationship] = if (forward.isDefined) {
-           pathSoFar.relationships + forward.get
-        } else {
-          pathSoFar.relationships + backward.get
-        }
         val updatedConnections = if (forward.isDefined) {
-          pathSoFar.connections + Connection(currentNode, forward.get, otherNode)
+          Connection(currentNode, forward.get, otherNode) :: pathSoFar
         } else {
-          pathSoFar.connections + Connection(currentNode, backward.get, otherNode)
+          Connection(currentNode, backward.get, otherNode) :: pathSoFar
         }
-        val updatedPath = CypherPath(updatedNodes, updatedRelationships, updatedConnections)
-        (updatedPath, otherNode)
+        (updatedConnections, otherNode)
     }
-    path
+    CypherPath(reversedPath.reverse)
   }
 
   override def visitPathLink(ctx: PathLinkContext): CypherValue = ???

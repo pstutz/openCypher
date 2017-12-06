@@ -31,9 +31,8 @@ case class Scenario(featureName: String, name: String, steps: List[Step]) extend
       case ((g, r), ExpectOrderedResult(expected)) =>
         assert(r == expected, s"Got result $r, but expected $expected")
         g -> r
-      case ((g, r), NoSideEffects) =>
-        g -> r
-      case _ => ???
+      case ((g, r), NoSideEffects) =>  g -> r
+      case (in, _) => in //TODO: Implement all steps
     }
   }
 }

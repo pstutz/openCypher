@@ -101,7 +101,8 @@ object CypherTCK {
             .toMap
         }.toList
         val expectedHeader = headerRow.getCells.asScala.toList.map(_.getValue)
-        Records(expectedHeader, expectedRows)
+                Records(expectedHeader, expectedRows)
+        Records.fromRows(expectedHeader, expectedRows)
       }
 
       val scenarioStep = step.getText match {

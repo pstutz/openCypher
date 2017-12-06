@@ -17,6 +17,8 @@
 package org.opencypher.tools.tck
 
 object Records {
+  def fromRows(header: List[String], data: List[Map[String, String]]): Records = ParseValues(header, data)
+
   val empty = Records(List.empty, List.empty)
   def emptyWithHeader(header: List[String]) = Records(header, List.empty)
 }

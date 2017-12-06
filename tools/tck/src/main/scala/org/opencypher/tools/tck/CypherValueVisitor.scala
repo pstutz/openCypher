@@ -30,9 +30,9 @@ sealed trait CypherValue
 case class CypherNode(labels: Set[String], properties: CypherPropertyMap)
   extends CypherValue
 
-case class CypherRelationship(relType: Option[String],
-                              properties: CypherPropertyMap)
-  extends CypherValue
+case class CypherRelationship(relType: Option[String], properties: CypherPropertyMap) extends CypherValue
+
+case class CypherString(s: String) extends CypherValue
 
 case class CypherInteger(value: Long) extends CypherValue
 
@@ -59,6 +59,11 @@ class CypherValueVisitor extends FeatureResultsBaseVisitor[CypherValue] {
 
   override def visitValue(ctx: ValueContext): CypherValue = {
     Option(visitChildren(ctx)).getOrElse(CypherNull)
+  }
+
+  override def visitString(ctx: StringContext) = {
+    val s = Try(ctx.STRING_LITERAL.getText).getOrElse("")
+    CypherString(s)
   }
 
   override def visitNode(ctx: NodeContext) = {

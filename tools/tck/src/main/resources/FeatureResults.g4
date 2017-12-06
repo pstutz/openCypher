@@ -28,23 +28,17 @@ value : node
       | map
       ;
 
-node : nodeDesc ;
+node : '(' (label)* WS? (propertyMap)? ')' ;
 
-nodeDesc : '(' (label)* WS? (propertyMap)? ')' ;
+relationship : '[' relationshipType WS? (propertyMap)? ']' ;
 
-relationship : relationshipDesc ;
+path : '<' node (pathSegment)* '>' ;
 
-relationshipDesc : '[' relationshipType WS? (propertyMap)? ']' ;
+pathSegment : (forwardsRelationship | backwardsRelationship) node ;
 
-path : '<' pathBody '>' ;
+forwardsRelationship : '-' relationship '->' ;
 
-pathBody : nodeDesc (pathLink)* ;
-
-pathLink : (forwardsRelationship | backwardsRelationship) nodeDesc ;
-
-forwardsRelationship : '-' relationshipDesc '->' ;
-
-backwardsRelationship : '<-' relationshipDesc '-' ;
+backwardsRelationship : '<-' relationship '-' ;
 
 integer : INTEGER_LITERAL ;
 
@@ -57,31 +51,21 @@ bool : 'true'
 
 nullValue : 'null' ;
 
-list : '[' (listContents)? ']' ;
+list : '[' (values)? ']' ;
 
-listContents : listElement (', ' listElement)* ;
-
-listElement : value ;
+values : value (', ' value)* ;
 
 map : propertyMap ;
 
-propertyMap : '{' (mapContents)? '}' ;
+propertyMap : '{' (keyValuePair (', ' keyValuePair)*)? '}' ;
 
-mapContents : keyValuePair (', ' keyValuePair)* ;
-
-keyValuePair: propertyKey ':' WS? propertyValue ;
+keyValuePair: propertyKey ':' WS? value ;
 
 propertyKey : SYMBOLIC_NAME ;
 
-propertyValue : value ;
+relationshipType : ':' SYMBOLIC_NAME ;
 
-relationshipType : ':' relationshipTypeName ;
-
-relationshipTypeName : SYMBOLIC_NAME ;
-
-label : ':' labelName ;
-
-labelName : SYMBOLIC_NAME ;
+label : ':' SYMBOLIC_NAME ;
 
 INTEGER_LITERAL : ('-')? DECIMAL_LITERAL ;
 
@@ -113,11 +97,7 @@ WS : ' ' ;
 
 IDENTIFIER : [a-zA-Z0-9$_]+ ;
 
-// The string rule should ideally not include the apostrophes in the parsed value,
-// but a lexer rule may not match the empty string, so I haven't found a way
-// to define that quite well yet.
-
-string : STRING_LITERAL ;
+string : '\'' STRING_BODY* '\'' ;
 
 STRING_LITERAL : '\'' STRING_BODY* '\'' ;
 
